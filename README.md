@@ -19,6 +19,10 @@ Some features this library might implement in the future:
 - Support for translating strings with placeholders
 - Support for plurals 
 
+## Documentation
+
+Documentation generated via JSDoc is in the docs directory
+
 ## Usage example
 
 Initialize the library:

@@ -14,6 +14,7 @@ var buffer = require('vinyl-buffer');
 var gutil = require('gulp-util');
 var babelify = require('babelify');
 var sourcemaps = require('gulp-sourcemaps');
+var jsdoc = require('gulp-jsdoc3');
 
 function bundleApp() {
   var appBundler = browserify({
@@ -48,6 +49,12 @@ gulp.task('scripts', ['clean'], function () {
 
 gulp.task('scripts:watch', function () {
   gulp.watch(['./src/*.js'], ['scripts']);
+});
+
+gulp.task('doc', function (cb) {
+  var config = require('./jsdoc.json');
+  gulp.src(['README.md', './src/**/*.js'], {read: false})
+    .pipe(jsdoc(config, cb));
 });
 
 gulp.task('default', ['scripts']);
