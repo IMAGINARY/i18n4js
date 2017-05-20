@@ -21,7 +21,7 @@ Some features this library might implement in the future:
 
 ## Documentation
 
-Documentation generated via JSDoc is in the docs directory
+Documentation generated via JSDoc is in the docs directory or available [here](https://imaginary.github.io/i18n4js/)
 
 ## Usage example
 
