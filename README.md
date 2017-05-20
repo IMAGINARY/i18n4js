@@ -19,9 +19,51 @@ Some features this library might implement in the future:
 - Support for translating strings with placeholders
 - Support for plurals 
 
-## API reference
+## Usage example
 
+Initialize the library:
 
+```
+IMAGINARY.i18n.init({
+  queryStringVariable: 'lang',
+  translationsDirectory: 'tr',
+  defaultLanguage: 'en'
+}).then(function(){
+  // Finished initializing
+}).except(function(err){
+  // Handle error
+});
+```
+
+get current language:
+
+```
+var lang = IMAGINARY.i18n.getLang();
+```
+
+set the language manually (instead of using the query string):
+
+```
+IMAGINARY.i18n.setLang('de');
+```
+
+get all strings:
+
+```
+var strings = IMAGINARY.i18n.getStrings();
+```
+
+translate a single string:
+
+```
+var string = IMAGINARY.i18n.t('STRING_ID');
+```
+
+## Internal details
+
+i18n4js loads translation files dynamically via an ajax request using superagent (included).
+
+All functions that set a language return a Promise using the bluebird implementation.
 
 ## License
 
