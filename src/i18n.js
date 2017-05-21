@@ -31,6 +31,7 @@ export default class I18n {
    *  Returns a promise resolved after the translation file is loaded
    */
   init(options = {}) {
+    this.constructor(); // reset state
     this.config = Object.assign(this.defaultOptions, options);
     return this.setLangFromQueryString();
   }

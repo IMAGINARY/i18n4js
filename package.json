@@ -1,6 +1,6 @@
 {
   "name": "i18n4js",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "IMAGINARY - i18n 4 JS",
   "repository": "IMAGINARY/i18n4js",
   "private": true,
@@ -16,16 +16,20 @@
     "babel-preset-react": "^6.5.0",
     "babelify": "^7.3.0",
     "browserify": "^13.0.1",
+    "chai": "^3.5.0",
     "del": "^2.2.2",
     "gulp": "^3.9.1",
     "gulp-jsdoc3": "^1.0.1",
     "gulp-sourcemaps": "^1.6.0",
     "gulp-uglify": "^2.1.2",
     "gulp-util": "^3.0.7",
+    "mocha": "^3.4.1",
+    "sinon": "^2.2.0",
     "vinyl-buffer": "^1.0.0",
-    "vinyl-source-stream": "^1.1.0"
+    "vinyl-source-stream": "^1.1.0",
+    "query-string": "^4.3.4"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha"
   }
 }
