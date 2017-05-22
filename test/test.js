@@ -66,9 +66,8 @@ describe('i18n4js', function(){
     });
 
     it('should default to english', function(){
-      var promise = i18n.init().then(function(){
-        expect(i18n.getLang()).to.equal('en');
-      });
+      var promise = i18n.init();
+      expect(i18n.getLang()).to.equal('en');
       simulateResponse(requests[0]);
       return promise;
     });
@@ -76,9 +75,8 @@ describe('i18n4js', function(){
     it('should use the specified default language if there is no query string parameter', function(){
       var promise = i18n.init({
         defaultLanguage: 'es'
-      }).then(function(){
-        expect(i18n.getLang()).to.equal('es');
       });
+      expect(i18n.getLang()).to.equal('es');
       simulateResponse(requests[0]);
       return promise;
     });
@@ -87,9 +85,8 @@ describe('i18n4js', function(){
       withQueryString({lang: 'es'});
       var promise = i18n.init({
         defaultLanguage: 'en'
-      }).then(function(){
-        expect(i18n.getLang()).to.equal('es');
       });
+      expect(i18n.getLang()).to.equal('es');
       simulateResponse(requests[0]);
       return promise;
     });
@@ -99,9 +96,8 @@ describe('i18n4js', function(){
       var promise = i18n.init({
         defaultLanguage: 'en',
         queryStringVariable: 'translation'
-      }).then(function(){
-        expect(i18n.getLang()).to.equal('es');
       });
+      expect(i18n.getLang()).to.equal('es');
       simulateResponse(requests[0]);
       return promise;
     });
@@ -170,36 +166,6 @@ describe('i18n4js', function(){
         expect(err.status).to.be.undefined;
       });
       simulateError(requests[0]);
-      return promise;
-    });
-
-    it('should fail to set the language manually if there\'s an error fetching the language', function() {
-      var promise = i18n.init().then(function(){
-        expect(i18n.getLang()).to.equal('en');
-        var promise2 = i18n.setLang('es');
-        simulateError(requests[1]);
-        return promise2;
-      }).catch(function(err){
-        expect(err).to.be.a('Error');
-        expect(err.status).to.be.undefined;
-        expect(i18n.getLang()).to.equal('en');
-      });
-      simulateResponse(requests[0]);
-      return promise;
-    });
-
-    it('should fail to set the language manually if the language file is invalid', function() {
-      var promise = i18n.init().then(function(){
-        expect(i18n.getLang()).to.equal('en');
-        var promise2 = i18n.setLang('fr');
-        simulateResponse(requests[1]);
-        return promise2;
-      }).catch(function(err){
-        expect(err).to.be.a('Error');
-        expect(err.status).to.equal(200);
-        expect(i18n.getLang()).to.equal('en');
-      });
-      simulateResponse(requests[0]);
       return promise;
     });
   });

@@ -64,12 +64,12 @@ export default class I18n {
    *  Returns a promise resolved after the translation file is loaded
    */
   setLang(code) {
+    this.lang = code;
     return new Promise((accept, reject) => {
       superagent
         .get(`${this.config.translationsDirectory}/${code}.json`)
         .set('Accept', 'json')
         .then((response) => {
-          this.lang = code;
           this.strings = response.body;
           accept();
         })
