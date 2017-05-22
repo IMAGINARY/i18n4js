@@ -115,6 +115,14 @@ describe('i18n4js', function(){
       return promise;
     });
 
+    it('should return the loaded language as argument of the promise', function() {
+      var promise = i18n.init().then(function(lang){
+        expect(lang).to.equal('en');
+      });
+      simulateResponse(requests[0]);
+      return promise;
+    });
+
     it('should return all the language strings', function() {
       var promise = i18n.init().then(function(){
         expect(i18n.getStrings()).to.deep.equal(require('./tr/en.json'));

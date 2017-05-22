@@ -71,7 +71,7 @@ export default class I18n {
         .set('Accept', 'json')
         .then((response) => {
           this.strings = response.body;
-          accept();
+          accept(code);
         })
         .catch((err) => {
           reject(err);
