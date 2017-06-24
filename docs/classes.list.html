@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
-	<title>Documentation Index</title>
+	<title>Documentation Classes</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -72,65 +72,95 @@
 		<div id="main">
 			
 
+	<h1 class="page-title">Classes</h1>
+<section>
+
+<header>
+    
+        <h2>
+        
+        </h2>
+        
+    
+</header>
+
+
+<article>
+    <div class="container-overview">
+    
+        
+
+        
+<dl class="details">
+    
+
 	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
 	
 
 
 
-
-
-
-
-
-
-
-
-	
 	
 
+	
+
+	
+
+	
+</dl>
 
 
+        
+    
+    </div>
 
+    
 
-    <section class="readme-section">
-        <article><h1>i18n4js</h1><p>Helper library to handle i18n (internationalization) in JS web apps.</p>
-<p>Features this library offers:</p>
-<ul>
-<li>Determine language from a query string variable</li>
-<li>Dynamically loading translation files</li>
-<li>Translation or listing of strings</li>
-</ul>
-<p>It was developed to quickly add basic i18n support to the <a href="https://github.com/IMAGINARY/cindyjs-apps">CindyJS apps</a> 
-and the <a href="https://github.com/IMAGINARY/applauncher2">AppLauncher Mark II</a> and other future projects.</p>
-<h3>Future development</h3><p>Some features this library might implement in the future:</p>
-<ul>
-<li>Support for language files included statically through <code>&lt;script&gt;</code> elements.</li>
-<li>Support for translating strings with placeholders</li>
-<li>Support for plurals </li>
-</ul>
-<h2>Documentation</h2><p>Documentation generated via JSDoc is in the docs directory or available <a href="https://imaginary.github.io/i18n4js/">here</a></p>
-<h2>Usage example</h2><p>Initialize the library:</p>
-<pre class="prettyprint source"><code>IMAGINARY.i18n.init({
-  queryStringVariable: 'lang',
-  translationsDirectory: 'tr',
-  defaultLanguage: 'en'
-}).then(function(){
-  // Finished initializing
-}).except(function(err){
-  // Handle error
-});</code></pre><p>get current language:</p>
-<pre class="prettyprint source"><code>var lang = IMAGINARY.i18n.getLang();</code></pre><p>set the language manually (instead of using the query string):</p>
-<pre class="prettyprint source"><code>IMAGINARY.i18n.setLang('de');</code></pre><p>get all strings:</p>
-<pre class="prettyprint source"><code>var strings = IMAGINARY.i18n.getStrings();</code></pre><p>translate a single string:</p>
-<pre class="prettyprint source"><code>var string = IMAGINARY.i18n.t('STRING_ID');</code></pre><h2>Internal details</h2><p>i18n4js loads translation files dynamically via an ajax request using superagent (included).</p>
-<p>All functions that set a language return a Promise using the bluebird implementation.</p>
-<h2>License</h2><p>Copyright 2017 IMAGINARY gGmbH
-Licensed under the Apache License, Version 2.0
-See LICENSE and NOTICE for more info</p></article>
-    </section>
+    
 
+    
+        <h3 class="subsection-title">Classes</h3>
 
+        <dl>
+            <dt><a href="module.exports.html">exports</a></dt>
+            <dd></dd>
+        </dl>
+    
 
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</article>
+
+</section>
 
 
 

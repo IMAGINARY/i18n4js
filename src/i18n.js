@@ -5,13 +5,30 @@ const superagent = require('superagent');
 
 export default class I18n {
 
+  /**
+   * @property {function} warn - Warning handler function. Takes a message parameter.
+   *   Defaults to console.warn
+   * @property {function} error - Error handler function. Takes a message parameter.
+   *   Defaults to console.error
+   */
   constructor() {
+    this.reset();
+    this.warn = (message => console.warn(message));
+    this.error = (message => console.error(message));
+  }
+
+  /**
+   * Resets the state of loaded translations and configuration
+   */
+  reset() {
     this.lang = '';
     this.strings = {};
+    this.status = {};
     this.defaultOptions = {
       queryStringVariable: 'lang',
       translationsDirectory: 'tr',
       defaultLanguage: 'en',
+      fallbackToDefaultLanguage: true,
     };
     this.config = {};
   }
@@ -27,54 +44,81 @@ export default class I18n {
    *  - translationsDirectory (default: 'tr'): Relative path to the directory holding the
    *    translations files
    *  - defaultLanguage (default: 'en'): Default language to use if no query string is specified
+   *  - fallbackToDefaultLanguage (default: true): Use default language when the requested language
+   *    does not exist or the requested string does not exist in the language.
    * @return {Promise}
    *  Returns a promise resolved after the translation file is loaded
    */
   init(options = {}) {
-    this.constructor(); // reset state
+    this.reset();
     this.config = Object.assign(this.defaultOptions, options);
-    return this.setLangFromQueryString();
+
+    const queryString = getQueryString();
+    const langVar = this.config.queryStringVariable;
+    if (langVar !== undefined && queryString[langVar] !== undefined) {
+      this.lang = queryString[langVar];
+    } else {
+      this.lang = this.config.defaultLanguage;
+    }
+
+    return this.loadLang(this.config.defaultLanguage)
+      .then(() => this.setLang(this.lang));
   }
 
   /**
-   * Set the current language using the query string
+   * Sets the current language. The translation will be loaded if it was
+   * not previously loaded or if a reload is requested.
    *
-   * Reads the query string in the URL looking for the queryStringVariable defined in the
-   * init options. If found sets the language to the language code specified in the variable.
-   * If the query string variable is not present it sets the language to the default.
+   * @param {string} code Language code
+   * @param {boolean} reload Reload the translation file
    *
    * @return {Promise}
    *  Returns a promise resolved after the translation file is loaded
    */
-  setLangFromQueryString() {
-    const queryString = getQueryString();
-    const langVar = this.config.queryStringVariable;
-    if (queryString[langVar] !== undefined && queryString[langVar] !== this.getLang()) {
-      return this.setLang(queryString[langVar]);
+  setLang(code, reload = false) {
+    this.lang = code;
+
+    if (reload === true || this.strings[this.lang] === undefined) {
+      return this.loadLang(code);
     }
-    return this.setLang(this.config.defaultLanguage);
+    return Promise.resolve(code);
   }
 
   /**
-   * Sets the current language
+   * Loads the specified language into the cache
+   *
+   * If the language was previously loaded this method causes a reload.
    *
    * @param {string} code Language code
    *
    * @return {Promise}
    *  Returns a promise resolved after the translation file is loaded
    */
-  setLang(code) {
-    this.lang = code;
-    return new Promise((accept, reject) => {
+  loadLang(code) {
+    this.status[code] = {
+      loading: true,
+      loaded: false,
+      failed: false,
+      message: '',
+    };
+    const trFile = `${this.config.translationsDirectory}/${code}.json`;
+    return new Promise((resolve) => {
       superagent
-        .get(`${this.config.translationsDirectory}/${code}.json`)
+        .get(trFile)
         .set('Accept', 'json')
         .then((response) => {
-          this.strings = response.body;
-          accept(code);
-        })
-        .catch((err) => {
-          reject(err);
+          this.status[code].loading = false;
+          this.status[code].loaded = true;
+          this.strings[code] = response.body;
+          resolve(code);
+        }).catch((err) => {
+          const errorMessage = `Error loading ${trFile}: ${err.message}`;
+          this.status[code].loading = false;
+          this.status[code].failed = true;
+          this.status[code].message = errorMessage;
+          this.warn(errorMessage);
+          this.strings[code] = {};
+          resolve(code);
         });
     });
   }
@@ -89,12 +133,34 @@ export default class I18n {
   }
 
   /**
+   * Gets the status of the translations
+   *
+   * Status is only returned for languages that were loaded (selected language and
+   * default language).
+   *
+   * @return {object} A map indexed by the language code containing objects with these properties:
+   *   - loading (boolean): True if the language is loading
+   *   - loaded (boolean): True if the language finished loading successfuly
+   *   - failed (boolean): True if there were errors while loading
+   *   - message (String): Error message
+   */
+  getStatus() {
+    return this.status;
+  }
+
+  /**
    * Returns the string dictionary of the current language
    *
    * @return {object} A dictionary of strings indexed by string ID
    */
   getStrings() {
-    return this.strings;
+    if (this.config.fallbackToDefaultLanguage && this.lang !== this.config.defaultLanguage) {
+      return Object.assign(this.strings[this.config.defaultLanguage], this.strings[this.lang]);
+    } else if (this.strings[this.lang] !== undefined) {
+      return this.strings[this.lang];
+    }
+
+    return {};
   }
 
   /**
@@ -106,8 +172,12 @@ export default class I18n {
    * @return {string} The translation
    */
   t(stringID) {
-    if (this.strings[stringID] !== undefined) {
-      return this.strings[stringID];
+    if (this.strings[this.lang] !== undefined && this.strings[this.lang][stringID] !== undefined) {
+      return this.strings[this.lang][stringID];
+    } else if (this.config.fallbackToDefaultLanguage) {
+      if (this.strings[this.config.defaultLanguage][stringID] !== undefined) {
+        return this.strings[this.config.defaultLanguage][stringID];
+      }
     }
     return '';
   }

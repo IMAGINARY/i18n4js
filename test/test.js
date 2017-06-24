@@ -10,22 +10,6 @@ function withQueryString(params) {
   global.window.location.search = '?' + qs.stringify(params);
 }
 
-function simulateResponse(request) {
-  if(request.url == 'tr/en.json') {
-    request.respond(200, { "Content-Type": "application/json" }, JSON.stringify(require('./tr/en.json')));
-  } else if(request.url == 'tr/es.json') {
-    request.respond(200, { "Content-Type": "application/json" }, JSON.stringify(require('./tr/es.json')));
-  } else if(request.url == 'tr/fr.json') {
-    request.respond(200, { "Content-Type": "application/json" }, "{invalid json");
-  } else {
-    request.respond(404, {}, '');
-  }
-}
-
-function simulateError(request) {
-  request.error();
-}
-
 describe('i18n4js', function(){
 
   describe('global object', function() {
@@ -48,27 +32,37 @@ describe('i18n4js', function(){
   describe('api', function() {
 
     var i18n = global.window.IMAGINARY.i18n;
-    var xhr = global.XMLHttpRequest = global.window.XMLHttpRequest = sinon.useFakeXMLHttpRequest();
-    var requests = [];
+    var fakeServer;
+    var xhr;
 
     before(function() {
-      global.XMLHttpRequest.onCreate = function(fakeRequest) {
-        requests.push(fakeRequest);
-      };
     });
 
     beforeEach(function(){
       // Simulate XHR
-      requests = [];
+      fakeServer = sinon.fakeServer.create();
+      fakeServer.respondImmediately = true;
+      fakeServer.respondWith('GET', 'tr/en.json', [200, { "Content-Type": "application/json" }, JSON.stringify(require('./tr/en.json'))]);
+      fakeServer.respondWith('GET', 'tr/es.json', [200, { "Content-Type": "application/json" }, JSON.stringify(require('./tr/es.json'))]);
+      fakeServer.respondWith('GET', 'tr/fr.json', [200, { "Content-Type": "application/json" }, "{invalid json"]);
+      fakeServer.respondWith([404, {}, '']);
+      xhr = global.XMLHttpRequest = global.window.XMLHttpRequest = fakeServer.xhr;
 
       // Clean the simulated query string
       withQueryString({});
+
+      // Warning handler stub
+      i18n.warn = sinon.spy();
+    });
+
+    afterEach(function() {
+      // Restore real XHR
+      sinon.fakeServer.restore();
     });
 
     it('should default to english', function(){
       var promise = i18n.init();
       expect(i18n.getLang()).to.equal('en');
-      simulateResponse(requests[0]);
       return promise;
     });
 
@@ -77,7 +71,6 @@ describe('i18n4js', function(){
         defaultLanguage: 'es'
       });
       expect(i18n.getLang()).to.equal('es');
-      simulateResponse(requests[0]);
       return promise;
     });
 
@@ -86,8 +79,8 @@ describe('i18n4js', function(){
       var promise = i18n.init({
         defaultLanguage: 'en'
       });
+
       expect(i18n.getLang()).to.equal('es');
-      simulateResponse(requests[0]);
       return promise;
     });
 
@@ -98,83 +91,102 @@ describe('i18n4js', function(){
         queryStringVariable: 'translation'
       });
       expect(i18n.getLang()).to.equal('es');
-      simulateResponse(requests[0]);
       return promise;
     });
 
     it('should allow setting the language manually', function() {
-      var promise = i18n.init().then(function(){
+      return i18n.init().then(function(){
         expect(i18n.getLang()).to.equal('en');
-        var promise2 = i18n.setLang('es');
-        simulateResponse(requests[1]);
-        return promise2;
+        return i18n.setLang('es');
       }).then(function(){
         expect(i18n.getLang()).to.equal('es');
       });
-      simulateResponse(requests[0]);
-      return promise;
+    });
+
+    it('should inform a successful status after loading', function() {
+      withQueryString({lang: 'es'});
+      return i18n.init().then(function() {
+        expect(i18n.getLang()).to.equal('es');
+        // The default language should load OK
+        expect(i18n.getStatus()['en']).to.have.property('loading', false);
+        expect(i18n.getStatus()['en']).to.have.property('loaded', true);
+        expect(i18n.getStatus()['en']).to.have.property('failed', false);
+        expect(i18n.getStatus()['en']).to.have.property('message', '');
+        // The selected language should load OK
+        expect(i18n.getStatus()['es']).to.have.property('loading', false);
+        expect(i18n.getStatus()['es']).to.have.property('loaded', true);
+        expect(i18n.getStatus()['es']).to.have.property('failed', false);
+        expect(i18n.getStatus()['es']).to.have.property('message', '');
+      });
     });
 
     it('should return the loaded language as argument of the promise', function() {
-      var promise = i18n.init().then(function(lang){
+      return i18n.init().then(function(lang){
         expect(lang).to.equal('en');
       });
-      simulateResponse(requests[0]);
-      return promise;
     });
 
     it('should return all the language strings', function() {
-      var promise = i18n.init().then(function(){
+      return i18n.init().then(function(){
         expect(i18n.getStrings()).to.deep.equal(require('./tr/en.json'));
       });
-      simulateResponse(requests[0]);
-      return promise;
     });
 
     it('should translate individual strings', function() {
-      var promise = i18n.init().then(function(){
+      return i18n.init().then(function(){
         expect(i18n.t("HELLO")).to.equal("Hi there!");
       });
-      simulateResponse(requests[0]);
-      return promise;
     });
 
-    it('should return an empty string if the requested string is not translated', function() {
-      var promise = i18n.init().then(function(){
+    it('should return an empty string if the requested string does not exist', function() {
+      return i18n.init().then(function(){
         expect(i18n.t("NON_EXISTANT")).to.equal("");
       });
-      simulateResponse(requests[0]);
-      return promise;
     });
 
-    it('should fail to init if the requested language does not exist', function() {
-      var promise = i18n.init({
-        defaultLanguage: 'ch'
-      }).catch(function(err){
-        expect(err).to.be.a('Error');
-        expect(err.status).to.equal(404);
+    it('should return the default language if the requested string is not translated', function() {
+      withQueryString({lang: 'es'});
+      return i18n.init({
+        defaultLanguage: 'en'
+      }).then(function(){
+        expect(i18n.t("ENGLISH_ONLY")).to.equal("Not translated");
       });
-      simulateResponse(requests[0]);
-      return promise;
     });
 
-    it('should fail to init if there\'s an error fetching the language', function() {
-      var promise = i18n.init().catch(function(err){
-        expect(err).to.be.a('Error');
-        expect(err.status).to.be.undefined;
+    it('should return an empty string if the requested string is not translated and fallback disabled', function() {
+      withQueryString({lang: 'es'});
+      return i18n.init({
+        defaultLanguage: 'en',
+        fallbackToDefaultLanguage: false
+      }).then(function(){
+        expect(i18n.t("ENGLISH_ONLY")).to.equal("");
       });
-      simulateError(requests[0]);
-      return promise;
     });
 
-    it('should fail to init if the language file is invalid', function() {
+    it('should return the default language if the requested language does not exist', function() {
+      withQueryString({lang: 'ch'});
+      return i18n.init({
+        defaultLanguage: 'es'
+      }).then(function(){
+        expect(i18n.t("HELLO")).to.equal("¡Hola! ¿Qué tal?");
+        expect(i18n.getStatus()['ch']).to.have.property('loading', false);
+        expect(i18n.getStatus()['ch']).to.have.property('loaded', false);
+        expect(i18n.getStatus()['ch']).to.have.property('failed', true);
+        expect(i18n.getStatus()['ch']).to.have.property('message', 'Error loading tr/ch.json: Not Found');
+        expect(i18n.warn.calledWith('Error loading tr/ch.json: Not Found')).to.be.true;
+      });
+    });
+
+
+    it('should warn if the language file is invalid', function() {
       withQueryString({lang: 'fr'});
-      var promise = i18n.init().catch(function(err){
-        expect(err).to.be.a('Error');
-        expect(err.status).to.be.undefined;
+      return i18n.init().then(function(){
+        expect(i18n.getStatus()['fr']).to.have.property('loading', false);
+        expect(i18n.getStatus()['fr']).to.have.property('loaded', false);
+        expect(i18n.getStatus()['fr']).to.have.property('failed', true);
+        expect(i18n.getStatus()['fr']).to.have.property('message', 'Error loading tr/fr.json: Parser is unable to parse the response');
+        expect(i18n.warn.calledWith('Error loading tr/fr.json: Parser is unable to parse the response')).to.be.true;
       });
-      simulateError(requests[0]);
-      return promise;
     });
   });
 });

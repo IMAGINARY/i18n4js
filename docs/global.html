@@ -31,9 +31,16 @@
 		<ul class="nav navbar-nav">
 			
 			<li class="dropdown">
+				<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="module.exports.html">module.exports</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
 				<a href="global.html" class="dropdown-toggle" data-toggle="dropdown">Global<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					<li><a href="global.html#getLang">getLang</a></li><li><a href="global.html#getStrings">getStrings</a></li><li><a href="global.html#init">init</a></li><li><a href="global.html#setLang">setLang</a></li><li><a href="global.html#setLangFromQueryString">setLangFromQueryString</a></li><li><a href="global.html#t">t</a></li>
+					<li><a href="global.html#getLang">getLang</a></li><li><a href="global.html#getStatus">getStatus</a></li><li><a href="global.html#getStrings">getStrings</a></li><li><a href="global.html#init">init</a></li><li><a href="global.html#loadLang">loadLang</a></li><li><a href="global.html#reset">reset</a></li><li><a href="global.html#setLang">setLang</a></li><li><a href="global.html#t">t</a></li>
 				</ul>
 			</li>
 			
@@ -244,6 +251,116 @@
             
 <hr>
 <dt>
+    <h4 class="name" id="getStatus"><span class="type-signature"></span>getStatus()</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Gets the status of the translations</p>
+<p>Status is only returned for languages that were loaded (selected language and
+default language).</p>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    <p>A map indexed by the language code containing objects with these properties:</p>
+<ul>
+<li>loading (boolean): True if the language is loading</li>
+<li>loaded (boolean): True if the language finished loading successfuly</li>
+<li>failed (boolean): True if there were errors while loading</li>
+<li>message (String): Error message</li>
+</ul>
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">object</span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
     <h4 class="name" id="getStrings"><span class="type-signature"></span>getStrings()</h4>
     
     
@@ -413,6 +530,8 @@
 <li>translationsDirectory (default: 'tr'): Relative path to the directory holding the
 translations files</li>
 <li>defaultLanguage (default: 'en'): Default language to use if no query string is specified</li>
+<li>fallbackToDefaultLanguage (default: true): Use default language when the requested language
+does not exist or the requested string does not exist in the language.</li>
 </ul>
 </li>
 </ul></td>
@@ -507,7 +626,7 @@ translations files</li>
             
 <hr>
 <dt>
-    <h4 class="name" id="setLang"><span class="type-signature"></span>setLang(code)</h4>
+    <h4 class="name" id="loadLang"><span class="type-signature"></span>loadLang(code)</h4>
     
     
 </dt>
@@ -515,7 +634,8 @@ translations files</li>
 
     
     <div class="description">
-        <p>Sets the current language</p>
+        <p>Loads the specified language into the cache</p>
+<p>If the language was previously loaded this method causes a reload.</p>
     </div>
     
 
@@ -659,7 +779,7 @@ translations files</li>
             
 <hr>
 <dt>
-    <h4 class="name" id="setLangFromQueryString"><span class="type-signature"></span>setLangFromQueryString()</h4>
+    <h4 class="name" id="reset"><span class="type-signature"></span>reset()</h4>
     
     
 </dt>
@@ -667,10 +787,7 @@ translations files</li>
 
     
     <div class="description">
-        <p>Set the current language using the query string</p>
-<p>Reads the query string in the URL looking for the queryStringVariable defined in the
-init options. If found sets the language to the language code specified in the variable.
-If the query string variable is not present it sets the language to the default.</p>
+        <p>Resets the state of loaded translations and configuration</p>
     </div>
     
 
@@ -679,6 +796,171 @@ If the query string variable is not present it sets the language to the default.
     
 
     
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="setLang"><span class="type-signature"></span>setLang(code, reload)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Sets the current language. The translation will be loaded if it was
+not previously loaded or if a reload is requested.</p>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>code</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>Language code</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>reload</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+                <td class="default">
+                
+                    false
+                
+                </td>
+            
+
+            <td class="description last"><p>Reload the translation file</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
     
 
     
@@ -957,7 +1239,7 @@ If the query string variable is not present it sets the language to the default.
 <span class="jsdoc-message">
 	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a>
 	
-		on May 20th 2017, 7:59:50 pm
+		on June 24th 2017, 12:13:28 pm
 	
 	using the <a href="https://github.com/docstrap/docstrap">DocStrap template</a>.
 </span>
