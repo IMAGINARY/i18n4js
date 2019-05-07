@@ -51,7 +51,7 @@ export default class I18n {
    */
   init(options = {}) {
     this.reset();
-    this.config = Object.assign(this.defaultOptions, options);
+    this.config = Object.assign({}, this.defaultOptions, options);
 
     const queryString = getQueryString();
     const langVar = this.config.queryStringVariable;
@@ -155,7 +155,7 @@ export default class I18n {
    */
   getStrings() {
     if (this.config.fallbackToDefaultLanguage && this.lang !== this.config.defaultLanguage) {
-      return Object.assign(this.strings[this.config.defaultLanguage], this.strings[this.lang]);
+      return Object.assign({}, this.strings[this.config.defaultLanguage], this.strings[this.lang]);
     } else if (this.strings[this.lang] !== undefined) {
       return this.strings[this.lang];
     }
