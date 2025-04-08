@@ -151,7 +151,8 @@ export default class I18n {
   /**
    * Returns the string dictionary of the current language
    *
-   * @return {object} A dictionary of strings indexed by string ID
+   * @return {object}
+   *   A dictionary of strings indexed by string ID
    */
   getStrings() {
     if (this.config.fallbackToDefaultLanguage && this.lang !== this.config.defaultLanguage) {
@@ -166,17 +167,25 @@ export default class I18n {
   /**
    * Returns a string translated to the current language
    *
-   * If the string ID is not found an empty string will be returned
+   * If the string ID is not found an empty string will be returned.
+   * If a language is specified, it must have been previously loaded.
    *
-   * @param stringID ID of the string to translate
-   * @return {string} The translation
+   * @param {string} stringID
+   *  ID of the string to translate
+   * @param {string} lang
+   *   Language code (optional). If not specified the current language will be used.
+   * @return {string}
+   *  The translation
    */
-  t(stringID) {
-    if (this.strings[this.lang] !== undefined && this.strings[this.lang][stringID] !== undefined) {
-      return this.strings[this.lang][stringID];
+  t(stringID, lang = null) {
+    const strings = lang !== null ? this.strings[lang] : this.strings[this.lang];
+    const defStrings = this.strings[this.config.defaultLanguage];
+
+    if (strings !== undefined && strings[stringID] !== undefined) {
+      return strings[stringID];
     } else if (this.config.fallbackToDefaultLanguage) {
-      if (this.strings[this.config.defaultLanguage][stringID] !== undefined) {
-        return this.strings[this.config.defaultLanguage][stringID];
+      if (defStrings[stringID] !== undefined) {
+        return defStrings[stringID];
       }
     }
     return '';
